@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: data-validation-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+
+server:
+  port: 8086
+
+# Data Validation Configuration
+data-validation:
+  # Maximum number of sample mismatches to include in the report
+  max-sample-mismatches: 10
+  # Default pass threshold percentage (0-100)
+  pass-threshold-percent: 100.0
+
+  # Source datasource configuration (e.g., DB2/mainframe)
+  source-datasource:
+    url: ${SOURCE_DB_URL:jdbc:hsqldb:mem:sourcedb}
+    username: ${SOURCE_DB_USERNAME:sa}
+    password: ${SOURCE_DB_PASSWORD:}
+    driver-class-name: ${SOURCE_DB_DRIVER:org.hsqldb.jdbc.JDBCDriver}
+
+  # Destination datasource configuration (e.g., Postgres)
+  destination-datasource:
+    url: ${DEST_DB_URL:jdbc:hsqldb:mem:destdb}
+    username: ${DEST_DB_USERNAME:sa}
+    password: ${DEST_DB_PASSWORD:}
+    driver-class-name: ${DEST_DB_DRIVER:org.hsqldb.jdbc.JDBCDriver}
+
+  # Mainframe file configuration
+  mainframe-file:
+    base-directory: ${MAINFRAME_FILE_DIR:./data/ASCII/}
+    default-encoding: ${MAINFRAME_FILE_ENCODING:UTF-8}
+
+  # REST API configuration for microservice comparison
+  api:
+    base-url: ${API_BASE_URL:http://localhost:8080}
+    connect-timeout-ms: ${API_CONNECT_TIMEOUT:5000}
+    read-timeout-ms: ${API_READ_TIMEOUT:30000}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+    import: configserver:http://config-server:8888
