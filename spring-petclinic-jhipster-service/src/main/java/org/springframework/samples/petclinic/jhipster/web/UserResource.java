@@ -52,7 +52,7 @@ class UserResource {
      */
     @PostMapping("/users")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<User> createUser(@Valid @RequestBody AdminUserDTO userDTO) throws URISyntaxException {
+    public ResponseEntity<AdminUserDTO> createUser(@Valid @RequestBody AdminUserDTO userDTO) throws URISyntaxException {
         log.debug("REST request to save User : {}", userDTO);
 
         if (userDTO.getId() != null) {
@@ -93,7 +93,8 @@ class UserResource {
 
         userRepository.save(user);
         log.debug("Created Information for User: {}", user);
-        return ResponseEntity.created(new URI("/api/admin/users/" + user.getLogin())).body(user);
+        AdminUserDTO result = new AdminUserDTO(user);
+        return ResponseEntity.created(new URI("/api/admin/users/" + user.getLogin())).body(result);
     }
 
     /**
