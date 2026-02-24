@@ -16,6 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>spring-petclinic-test-common</module>
         <module>spring-petclinic-admin-server</module>
         <module>spring-petclinic-customers-service</module>
         <module>spring-petclinic-vets-service</module>
@@ -34,6 +35,8 @@
         <chaos-monkey-spring-boot.version>3.1.0</chaos-monkey-spring-boot.version>
         <jolokia-core.version>1.7.1</jolokia-core.version>
         <datasource-micrometer.version>2.0.1</datasource-micrometer.version>
+
+        <cucumber.version>7.20.1</cucumber.version>
 
         <docker.image.prefix>springcommunity</docker.image.prefix>
         <docker.image.exposed.port>9090</docker.image.exposed.port>
@@ -160,6 +163,49 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>test-customers</id>
+            <modules>
+                <module>spring-petclinic-test-common</module>
+                <module>spring-petclinic-customers-service</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>test-vets</id>
+            <modules>
+                <module>spring-petclinic-test-common</module>
+                <module>spring-petclinic-vets-service</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>test-visits</id>
+            <modules>
+                <module>spring-petclinic-test-common</module>
+                <module>spring-petclinic-visits-service</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>test-data-validation</id>
+            <modules>
+                <module>spring-petclinic-test-common</module>
+                <module>spring-petclinic-data-validation-service</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>test-all</id>
+            <modules>
+                <module>spring-petclinic-test-common</module>
+                <module>spring-petclinic-customers-service</module>
+                <module>spring-petclinic-vets-service</module>
+                <module>spring-petclinic-visits-service</module>
+                <module>spring-petclinic-data-validation-service</module>
+            </modules>
         </profile>
 
         <profile>

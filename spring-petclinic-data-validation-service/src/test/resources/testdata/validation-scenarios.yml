@@ -1,0 +1,53 @@
+- description: "DB-to-DB comparison with basic fields"
+  expectedStatus: "ERROR"
+  sourceQuery: "SELECT id, first_name, last_name FROM owners"
+  destinationQuery: "SELECT id, first_name, last_name FROM owners"
+  compareFields:
+    - id
+    - first_name
+    - last_name
+
+- description: "File-to-API comparison with fixed-width fields"
+  expectedStatus: "ERROR"
+  filePath: "sample-owners.dat"
+  fieldDefinitions:
+    - name: "owner_id"
+      startPosition: 0
+      length: 5
+      targetFieldName: "id"
+    - name: "first_name"
+      startPosition: 5
+      length: 30
+      targetFieldName: "firstName"
+  apiEndpoint: "http://localhost:8080/owners"
+  responseJsonPath: "$"
+  compareFields:
+    - id
+    - firstName
+  skipHeaderLines: 1
+
+- description: "File-to-DB comparison with field mapping"
+  expectedStatus: "ERROR"
+  filePath: "sample-vets.dat"
+  fieldDefinitions:
+    - name: "vet_id"
+      startPosition: 0
+      length: 5
+      targetFieldName: "id"
+    - name: "vet_fname"
+      startPosition: 5
+      length: 30
+      targetFieldName: "first_name"
+  destinationQuery: "SELECT id, first_name FROM vets"
+  compareFields:
+    - id
+    - first_name
+  skipHeaderLines: 0
+
+- description: "Custom threshold override test"
+  expectedStatus: "ERROR"
+  sourceQuery: "SELECT id FROM owners"
+  destinationQuery: "SELECT id FROM owners"
+  compareFields:
+    - id
+  passThresholdPercent: 95.0

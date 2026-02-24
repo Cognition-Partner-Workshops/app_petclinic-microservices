@@ -1,0 +1,31 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+data-validation:
+  max-sample-mismatches: 10
+  pass-threshold-percent: 100.0
+  source-datasource:
+    url: jdbc:hsqldb:mem:sourcedb
+    username: sa
+    password: ""
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+  destination-datasource:
+    url: jdbc:hsqldb:mem:destdb
+    username: sa
+    password: ""
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+  mainframe-file:
+    base-directory: ./data/ASCII/
+    default-encoding: UTF-8
+  api:
+    base-url: http://localhost:8080
+    connect-timeout-ms: 5000
+    read-timeout-ms: 30000
+
+logging.level.org.springframework: INFO
