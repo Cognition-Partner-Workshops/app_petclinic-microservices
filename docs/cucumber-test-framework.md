@@ -192,12 +192,14 @@ package org.springframework.samples.petclinic.<service>.cucumber;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 
 @CucumberContextConfiguration
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@ComponentScan(basePackages = "org.springframework.samples.petclinic.test")
 public class CucumberSpringConfiguration {
 }
 ```
