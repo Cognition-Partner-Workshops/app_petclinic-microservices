@@ -20,7 +20,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Cache could be disable in unit test.
+ * Enables Spring caching infrastructure for the Vets service.
+ * <p>
+ * Only active under the {@code production} profile so that caching
+ * can be disabled during unit and integration tests for deterministic behavior.
+ *
  * @author Maciej Szarlinski
  */
 @Configuration

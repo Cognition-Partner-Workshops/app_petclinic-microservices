@@ -21,7 +21,17 @@ import jakarta.validation.constraints.Size;
 import java.util.Date;
 
 /**
- * @author mszarlinski@bravurasolutions.com on 2016-12-05.
+ * Request body record for creating or updating a pet.
+ * <p>
+ * Used by the {@link PetResource} to receive pet data from API clients.
+ * The birth date must follow the {@code yyyy-MM-dd} format and the name
+ * must have at least one character.
+ *
+ * @param id        the pet identifier (used during updates; ignored on creation)
+ * @param birthDate the pet's date of birth in {@code yyyy-MM-dd} format
+ * @param name      the pet's name (minimum 1 character)
+ * @param typeId    the ID of the pet type (e.g. 1=cat, 2=dog)
+ * @author Maciej Szarlinski
  */
 record PetRequest(int id,
                   @JsonFormat(pattern = "yyyy-MM-dd")

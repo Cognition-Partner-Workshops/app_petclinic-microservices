@@ -20,12 +20,24 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
+ * Entry point for the Customers microservice.
+ * <p>
+ * Manages pet owner and pet data for the PetClinic system. Exposes REST endpoints
+ * for creating, reading, and updating owners and their associated pets. Persists
+ * data using Spring Data JPA and registers with Eureka for service discovery.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
  */
 @EnableDiscoveryClient
 @SpringBootApplication
 public class CustomersServiceApplication {
 
+	/**
+	 * Launches the Customers Service application.
+	 *
+	 * @param args command-line arguments passed to the application
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(CustomersServiceApplication.class, args);
 	}

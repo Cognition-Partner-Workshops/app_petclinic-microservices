@@ -16,8 +16,9 @@
 package org.springframework.samples.petclinic.genai.dto;
 
 /**
- * Simple Data Transfer Object representing a Pet type.
+ * Data Transfer Object representing a pet's species classification (e.g. cat, dog, hamster).
  *
+ * @param name the display name of the pet type
  * @author Oded Shopen
  */
 public record PetType(String name) {

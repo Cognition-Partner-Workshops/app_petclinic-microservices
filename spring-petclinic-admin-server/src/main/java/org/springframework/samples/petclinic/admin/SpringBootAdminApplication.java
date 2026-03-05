@@ -20,10 +20,27 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+/**
+ * Entry point for the Spring Boot Admin Server application.
+ * <p>
+ * This microservice provides a web-based UI for monitoring and managing all
+ * registered Spring Boot application instances in the PetClinic ecosystem.
+ * It leverages Eureka service discovery to automatically detect and register
+ * services for health checks, metrics visualization, and log-level management.
+ *
+ * @see de.codecentric.boot.admin.server.config.EnableAdminServer
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
+ */
 @SpringBootApplication
 @EnableAdminServer
 @EnableDiscoveryClient
 public class SpringBootAdminApplication {
+
+    /**
+     * Launches the Spring Boot Admin Server application.
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(String[] args) {
         SpringApplication.run(SpringBootAdminApplication.class, args);
     }

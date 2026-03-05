@@ -18,19 +18,24 @@ package org.springframework.samples.petclinic.vets.model;
 import jakarta.persistence.*;
 
 /**
- * Models a {@link Vet Vet's} specialty (for example, dentistry).
+ * JPA entity representing a veterinarian's area of expertise (e.g. radiology, surgery, dentistry).
+ * <p>
+ * Mapped to the {@code specialties} table. Associated with {@link Vet} entities
+ * through a many-to-many join table.
  *
  * @author Juergen Hoeller
  * @author Ramazan Sakin
  */
-
 @Entity
 @Table(name = "specialties")
 public class Specialty {
+
+    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /** The display name of this specialty. */
     @Column(name = "name")
     private String name;
 

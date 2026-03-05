@@ -20,12 +20,24 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
+ * Entry point for the Visits microservice.
+ * <p>
+ * Manages veterinary visit records for the PetClinic system. Provides REST
+ * endpoints for creating and querying visits associated with specific pets.
+ * Registers with Eureka for service discovery.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
  */
 @EnableDiscoveryClient
 @SpringBootApplication
 public class VisitsServiceApplication {
 
+    /**
+     * Launches the Visits Service application.
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(String[] args) {
         SpringApplication.run(VisitsServiceApplication.class, args);
     }

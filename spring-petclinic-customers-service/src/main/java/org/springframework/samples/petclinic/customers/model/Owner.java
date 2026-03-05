@@ -66,6 +66,12 @@ public class Owner {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
+    /**
+     * Returns the internal mutable set of pets, lazily initializing it if necessary.
+     * For internal use only — external callers should use {@link #getPets()}.
+     *
+     * @return the mutable set of pets owned by this owner
+     */
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {
             this.pets = new HashSet<>();
@@ -73,12 +79,22 @@ public class Owner {
         return this.pets;
     }
 
+    /**
+     * Returns an unmodifiable, alphabetically sorted list of this owner's pets.
+     *
+     * @return a sorted, unmodifiable list of {@link Pet} instances
+     */
     public List<Pet> getPets() {
         final List<Pet> sortedPets = new ArrayList<>(getPetsInternal());
         PropertyComparator.sort(sortedPets, new MutableSortDefinition("name", true, true));
         return Collections.unmodifiableList(sortedPets);
     }
 
+    /**
+     * Adds a pet to this owner and establishes the bidirectional relationship.
+     *
+     * @param pet the pet to associate with this owner
+     */
     public void addPet(Pet pet) {
         getPetsInternal().add(pet);
         pet.setOwner(this);

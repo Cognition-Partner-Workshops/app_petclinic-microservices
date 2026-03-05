@@ -31,6 +31,11 @@ class PetclinicTools {
 
     private final AIDataProvider petclinicAiProvider;
 
+    /**
+     * Constructs the tools component with the data provider dependency.
+     *
+     * @param petclinicAiProvider the data provider for querying and mutating PetClinic data
+     */
     PetclinicTools(AIDataProvider petclinicAiProvider) {
         this.petclinicAiProvider = petclinicAiProvider;
     }
@@ -73,6 +78,18 @@ class PetclinicTools {
 
 }
 
+/**
+ * Request record for creating a new pet owner via the GenAI service's LLM tools.
+ * <p>
+ * All fields are validated: names, address, and city must be non-blank,
+ * and the telephone number must contain only digits (up to 12).
+ *
+ * @param firstName the owner's first name (required)
+ * @param lastName  the owner's last name (required)
+ * @param address   the owner's street address (required)
+ * @param city      the owner's city (required)
+ * @param telephone the owner's phone number — digits only, up to 12 characters (required)
+ */
 record OwnerRequest(@NotBlank String firstName,
         @NotBlank String lastName,
         @NotBlank String address,

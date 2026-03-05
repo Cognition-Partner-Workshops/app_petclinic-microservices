@@ -20,12 +20,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 /**
+ * Entry point for the Eureka Discovery Server application.
+ * <p>
+ * Acts as the service registry for the PetClinic microservices architecture.
+ * All microservices register themselves with this Eureka server on startup,
+ * enabling dynamic service discovery, client-side load balancing, and
+ * health monitoring across the distributed system.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.netflix.eureka.server.EnableEurekaServer
  */
 @SpringBootApplication
 @EnableEurekaServer
 public class DiscoveryServerApplication {
 
+	/**
+	 * Launches the Eureka Discovery Server application.
+	 *
+	 * @param args command-line arguments passed to the application
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(DiscoveryServerApplication.class, args);
 	}

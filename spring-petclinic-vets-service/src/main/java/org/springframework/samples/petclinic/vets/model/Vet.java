@@ -54,6 +54,12 @@ public class Vet {
         inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
 
+    /**
+     * Returns the internal mutable set of specialties, lazily initializing it if necessary.
+     * For internal use only — external callers should use {@link #getSpecialties()}.
+     *
+     * @return the mutable set of specialties for this vet
+     */
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
             this.specialties = new HashSet<>();
@@ -61,6 +67,11 @@ public class Vet {
         return this.specialties;
     }
 
+    /**
+     * Returns an unmodifiable, alphabetically sorted list of this vet's specialties.
+     *
+     * @return a sorted, unmodifiable list of {@link Specialty} instances
+     */
     @XmlElement
     public List<Specialty> getSpecialties() {
         List<Specialty> sortedSpecs = new ArrayList<>(getSpecialtiesInternal());
@@ -68,10 +79,20 @@ public class Vet {
         return Collections.unmodifiableList(sortedSpecs);
     }
 
+    /**
+     * Returns the number of specialties this vet has.
+     *
+     * @return the count of specialties
+     */
     public int getNrOfSpecialties() {
         return getSpecialtiesInternal().size();
     }
 
+    /**
+     * Adds a specialty to this vet's set of specialties.
+     *
+     * @param specialty the specialty to add
+     */
     public void addSpecialty(Specialty specialty) {
         getSpecialtiesInternal().add(specialty);
     }

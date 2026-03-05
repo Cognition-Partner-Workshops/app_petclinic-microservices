@@ -34,6 +34,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * REST controller exposing endpoints for veterinary visit management.
+ * <p>
+ * Provides creation and retrieval of visit records for individual pets and
+ * batch retrieval across multiple pets. All endpoints are instrumented with
+ * Micrometer's {@code petclinic.visit} timer for observability.
+ *
  * @author Juergen Hoeller
  * @author Ken Krebs
  * @author Arjen Poutsma
@@ -49,10 +55,22 @@ class VisitResource {
 
     private final VisitRepository visitRepository;
 
+    /**
+     * Constructs the resource with the required repository.
+     *
+     * @param visitRepository the JPA repository for {@link Visit} persistence
+     */
     VisitResource(VisitRepository visitRepository) {
         this.visitRepository = visitRepository;
     }
 
+    /**
+     * Creates a new visit for the specified pet.
+     *
+     * @param visit the visit data to persist (validated)
+     * @param petId the ID of the pet to associate with the visit (must be >= 1)
+     * @return the persisted {@link Visit} entity with its generated ID
+     */
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
     public Visit create(
@@ -64,17 +82,37 @@ class VisitResource {
         return visitRepository.save(visit);
     }
 
+    /**
+     * Retrieves all visits for a specific pet.
+     *
+     * @param petId the ID of the pet whose visits to retrieve (must be >= 1)
+     * @return a list of visits for the given pet
+     */
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> read(@PathVariable("petId") @Min(1) int petId) {
         return visitRepository.findByPetId(petId);
     }
 
+    /**
+     * Retrieves visits for multiple pets in a single batch request.
+     * <p>
+     * Called by the API Gateway to aggregate visit data across several pets.
+     *
+     * @param petIds the list of pet IDs to look up visits for
+     * @return a {@link Visits} wrapper containing the matching visits
+     */
     @GetMapping("pets/visits")
     public Visits read(@RequestParam("petId") List<Integer> petIds) {
         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
         return new Visits(byPetIdIn);
     }
 
+    /**
+     * Wrapper record for a collection of visits, used as the response body
+     * for the batch visit retrieval endpoint.
+     *
+     * @param items the list of visit records
+     */
     record Visits(
         List<Visit> items
     ) {

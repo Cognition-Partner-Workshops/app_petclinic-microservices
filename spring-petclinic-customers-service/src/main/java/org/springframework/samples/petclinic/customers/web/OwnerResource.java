@@ -30,6 +30,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * REST controller exposing CRUD endpoints for pet owner management.
+ * <p>
+ * Handles HTTP requests under the {@code /owners} path and delegates persistence
+ * operations to {@link OwnerRepository}. All endpoints are instrumented with
+ * Micrometer's {@code petclinic.owner} timer for observability.
+ *
  * @author Juergen Hoeller
  * @author Ken Krebs
  * @author Arjen Poutsma
@@ -46,13 +52,22 @@ class OwnerResource {
     private final OwnerRepository ownerRepository;
     private final OwnerEntityMapper ownerEntityMapper;
 
+    /**
+     * Constructs the resource with the required repository and mapper.
+     *
+     * @param ownerRepository   the JPA repository for {@link Owner} persistence
+     * @param ownerEntityMapper the mapper for converting {@link OwnerRequest} to {@link Owner}
+     */
     OwnerResource(OwnerRepository ownerRepository, OwnerEntityMapper ownerEntityMapper) {
         this.ownerRepository = ownerRepository;
         this.ownerEntityMapper = ownerEntityMapper;
     }
 
     /**
-     * Create Owner
+     * Creates a new pet owner from the supplied request data.
+     *
+     * @param ownerRequest the validated owner data to persist
+     * @return the newly created {@link Owner} entity with its generated ID
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -62,7 +77,10 @@ class OwnerResource {
     }
 
     /**
-     * Read single Owner
+     * Retrieves a single owner by their unique identifier.
+     *
+     * @param ownerId the owner's ID (must be >= 1)
+     * @return an {@link Optional} containing the owner if found, or empty otherwise
      */
     @GetMapping(value = "/{ownerId}")
     public Optional<Owner> findOwner(@PathVariable("ownerId") @Min(1) int ownerId) {
@@ -70,7 +88,9 @@ class OwnerResource {
     }
 
     /**
-     * Read List of Owners
+     * Retrieves all registered pet owners.
+     *
+     * @return a list of all {@link Owner} entities
      */
     @GetMapping
     public List<Owner> findAll() {
@@ -78,7 +98,11 @@ class OwnerResource {
     }
 
     /**
-     * Update Owner
+     * Updates an existing owner's information.
+     *
+     * @param ownerId      the ID of the owner to update (must be >= 1)
+     * @param ownerRequest the validated updated owner data
+     * @throws ResourceNotFoundException if no owner exists with the given ID
      */
     @PutMapping(value = "/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

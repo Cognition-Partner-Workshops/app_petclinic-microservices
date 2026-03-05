@@ -16,11 +16,13 @@
 package org.springframework.samples.petclinic.genai.dto;
 
 /**
- * Simple Data Transfer Object representing a vet's specialty.
+ * Data Transfer Object representing a veterinarian's area of expertise
+ * (e.g. radiology, surgery, dentistry).
  *
+ * @param id   the unique identifier of the specialty
+ * @param name the display name of the specialty
  * @author Oded Shopen
  */
-
 public record Specialty(
     Integer id,
     String name

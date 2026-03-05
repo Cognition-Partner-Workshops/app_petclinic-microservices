@@ -12,7 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This REST controller is being invoked by the in order to interact with the LLM
+ * REST controller that exposes the AI chat endpoint for the PetClinic front-end.
+ * <p>
+ * Receives natural-language queries from users and forwards them to the configured
+ * LLM via Spring AI's {@link ChatClient}. The chat client is pre-configured with:
+ * <ul>
+ *   <li>A system prompt defining the assistant's persona and behavioral rules</li>
+ *   <li>Chat memory (up to 10 previous messages) for conversational context</li>
+ *   <li>Tool bindings to {@link PetclinicTools} for executing domain actions</li>
+ *   <li>A logging advisor for request/response observability</li>
+ * </ul>
  *
  * @author Oded Shopen
  */
@@ -22,12 +31,17 @@ public class PetclinicChatClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(PetclinicChatClient.class);
 
-	// ChatModel is the primary interfaces for interacting with an LLM
-	// it is a request/response interface that implements the ModelModel
-	// interface. Make suer to visit the source code of the ChatModel and
-	// checkout the interfaces in the core Spring AI package.
+	/** The configured Spring AI chat client used to interact with the LLM. */
 	private final ChatClient chatClient;
 
+	/**
+	 * Constructs the chat controller, building a {@link ChatClient} with a system prompt,
+	 * memory advisor, logging advisor, and tool bindings.
+	 *
+	 * @param builder         the auto-configured {@link ChatClient.Builder} from Spring AI
+	 * @param chatMemory      the chat memory store for maintaining conversation context
+	 * @param petclinicTools  the tool beans the LLM can invoke for domain operations
+	 */
 	public PetclinicChatClient(ChatClient.Builder builder, ChatMemory chatMemory,
                                PetclinicTools petclinicTools) {
         // @formatter:off
@@ -54,11 +68,18 @@ public class PetclinicChatClient {
 				.build();
   }
 
+  /**
+   * Processes a chat message by forwarding it to the LLM and returning its response.
+   * <p>
+   * All chatbot interactions flow through this single endpoint. If the LLM call
+   * fails for any reason, a user-friendly error message is returned instead.
+   *
+   * @param query the natural-language query from the user
+   * @return the LLM's response text, or an error message if processing fails
+   */
   @PostMapping("/chatclient")
   public String exchange(@RequestBody String query) {
 	  try {
-		  //All chatbot messages go through this endpoint
-		  //and are passed to the LLM
 		  return this.chatClient
               .prompt()
               .user(query)

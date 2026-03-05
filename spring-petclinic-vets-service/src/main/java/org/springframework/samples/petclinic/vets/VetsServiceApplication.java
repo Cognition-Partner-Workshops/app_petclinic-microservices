@@ -22,13 +22,26 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.samples.petclinic.vets.system.VetsProperties;
 
 /**
+ * Entry point for the Vets microservice.
+ * <p>
+ * Manages veterinarian data for the PetClinic system. Exposes a REST endpoint
+ * for listing veterinarians and their specialties, with results cached for
+ * performance. Registers with Eureka for service discovery and binds
+ * {@link VetsProperties} for externalized cache configuration.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
  */
 @EnableDiscoveryClient
 @SpringBootApplication
 @EnableConfigurationProperties(VetsProperties.class)
 public class VetsServiceApplication {
 
+	/**
+	 * Launches the Vets Service application.
+	 *
+	 * @param args command-line arguments passed to the application
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(VetsServiceApplication.class, args);
 	}

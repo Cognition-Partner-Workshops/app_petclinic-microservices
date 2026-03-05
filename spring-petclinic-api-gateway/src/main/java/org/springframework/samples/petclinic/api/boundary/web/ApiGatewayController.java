@@ -31,6 +31,13 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
+ * REST controller that aggregates data from the Customers and Visits microservices.
+ * <p>
+ * Serves as the backend-for-frontend (BFF) layer, composing owner details with their
+ * pets' visit histories in a single response. Uses reactive programming ({@link Mono})
+ * for non-blocking I/O and a Resilience4j circuit breaker to gracefully degrade when
+ * the Visits service is unavailable.
+ *
  * @author Maciej Szarlinski
  */
 @RestController
@@ -43,6 +50,13 @@ public class ApiGatewayController {
 
     private final ReactiveCircuitBreakerFactory cbFactory;
 
+    /**
+     * Constructs the controller with the required service clients and circuit breaker factory.
+     *
+     * @param customersServiceClient client for retrieving owner and pet data
+     * @param visitsServiceClient    client for retrieving visit records
+     * @param cbFactory              factory for creating reactive circuit breakers
+     */
     public ApiGatewayController(CustomersServiceClient customersServiceClient,
                                 VisitsServiceClient visitsServiceClient,
                                 ReactiveCircuitBreakerFactory cbFactory) {
@@ -51,6 +65,16 @@ public class ApiGatewayController {
         this.cbFactory = cbFactory;
     }
 
+    /**
+     * Retrieves complete owner details including pet information and visit history.
+     * <p>
+     * Fetches the owner from the Customers service, then enriches each pet with its
+     * visit records from the Visits service. The visits call is wrapped in a circuit
+     * breaker that returns an empty visits list if the Visits service is unavailable.
+     *
+     * @param ownerId the unique identifier of the owner
+     * @return a {@link Mono} emitting the fully composed {@link OwnerDetails}
+     */
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -65,6 +89,13 @@ public class ApiGatewayController {
 
     }
 
+    /**
+     * Returns a mapping function that associates each visit with the correct pet
+     * belonging to the given owner.
+     *
+     * @param owner the owner whose pets should be enriched with visit data
+     * @return a function that maps {@link Visits} onto the owner's pets and returns the owner
+     */
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.pets()
@@ -77,6 +108,12 @@ public class ApiGatewayController {
         };
     }
 
+    /**
+     * Provides a fallback that returns an empty {@link Visits} collection.
+     * Used by the circuit breaker when the Visits service is unreachable.
+     *
+     * @return a {@link Mono} emitting an empty {@link Visits} instance
+     */
     private Mono<Visits> emptyVisitsForPets() {
         return Mono.just(new Visits(List.of()));
     }

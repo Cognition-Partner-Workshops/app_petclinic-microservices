@@ -20,6 +20,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 /**
+ * Data Transfer Object representing the full details of a pet owner,
+ * including their personal information and a list of their pets.
+ * <p>
+ * Used by the API Gateway to compose responses that aggregate data
+ * from the Customers and Visits microservices.
+ *
+ * @param id        the unique identifier of the owner
+ * @param firstName the owner's first name
+ * @param lastName  the owner's last name
+ * @param address   the owner's street address
+ * @param city      the owner's city of residence
+ * @param telephone the owner's telephone number
+ * @param pets      the list of pets belonging to this owner
  * @author Maciej Szarlinski
  */
 public record OwnerDetails(
@@ -31,6 +44,12 @@ public record OwnerDetails(
     String telephone,
     List<PetDetails> pets) {
 
+    /**
+     * Extracts the list of pet IDs from this owner's pets.
+     * Excluded from JSON serialization since it is a derived convenience accessor.
+     *
+     * @return an unmodifiable list of pet identifiers
+     */
     @JsonIgnore
     public List<Integer> getPetIds() {
         return pets.stream()
@@ -39,6 +58,9 @@ public record OwnerDetails(
     }
 
 
+    /**
+     * Builder for constructing {@link OwnerDetails} instances, primarily used in tests.
+     */
     public static final class OwnerDetailsBuilder {
         private int id;
         private String firstName;
@@ -51,6 +73,11 @@ public record OwnerDetails(
         private OwnerDetailsBuilder() {
         }
 
+        /**
+         * Creates a new builder instance.
+         *
+         * @return a new {@link OwnerDetailsBuilder}
+         */
         public static OwnerDetailsBuilder anOwnerDetails() {
             return new OwnerDetailsBuilder();
         }
@@ -90,6 +117,11 @@ public record OwnerDetails(
             return this;
         }
 
+        /**
+         * Builds a new {@link OwnerDetails} record from the accumulated builder state.
+         *
+         * @return a fully constructed {@link OwnerDetails} instance
+         */
         public OwnerDetails build() {
             return new OwnerDetails(id, firstName, lastName, address, city, telephone, pets);
         }

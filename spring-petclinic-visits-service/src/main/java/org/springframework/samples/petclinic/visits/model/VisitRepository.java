@@ -21,18 +21,33 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Repository class for <code>Visit</code> domain objects All method names are compliant with Spring Data naming conventions so this interface can easily be extended for Spring
- * Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
+ * Spring Data JPA repository for {@link Visit} domain objects.
+ * <p>
+ * All query method names follow Spring Data naming conventions, enabling
+ * automatic query derivation without explicit JPQL.
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Michael Isvy
  * @author Maciej Szarlinski
+ * @see <a href="https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html">Spring Data JPA Query Methods</a>
  */
 public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
+    /**
+     * Retrieves all visits for a specific pet.
+     *
+     * @param petId the ID of the pet whose visits to retrieve
+     * @return a list of visits for the given pet
+     */
     List<Visit> findByPetId(int petId);
 
+    /**
+     * Retrieves all visits for multiple pets in a single query.
+     *
+     * @param petIds the collection of pet IDs to look up visits for
+     * @return a list of visits belonging to any of the specified pets
+     */
     List<Visit> findByPetIdIn(Collection<Integer> petIds);
 }

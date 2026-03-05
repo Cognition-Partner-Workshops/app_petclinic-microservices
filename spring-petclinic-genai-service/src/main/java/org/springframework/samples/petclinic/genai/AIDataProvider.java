@@ -33,12 +33,23 @@ public class AIDataProvider {
 
     private final DiscoveryClient discoveryClient;
 
+	/**
+	 * Constructs the data provider with vector store and discovery client dependencies.
+	 *
+	 * @param vectorStore     the vector store for veterinarian similarity searches
+	 * @param discoveryClient the Eureka discovery client for resolving service URIs
+	 */
 	public AIDataProvider(VectorStore vectorStore, DiscoveryClient discoveryClient) {
         this.restClient = RestClient.builder().build();
         this.vectorStore = vectorStore;
         this.discoveryClient = discoveryClient;
     }
 
+	/**
+	 * Retrieves all pet owners from the Customers microservice.
+	 *
+	 * @return a list of all {@link OwnerDetails} records
+	 */
 	public List<OwnerDetails> getAllOwners() {
         return restClient
             .get()
@@ -48,6 +59,17 @@ public class AIDataProvider {
             });
 	}
 
+    /**
+     * Searches for veterinarians using vector similarity against the stored embeddings.
+     * <p>
+     * Serializes the vet request to JSON and performs a similarity search in the vector
+     * store. Returns up to 20 results when criteria are provided, or up to 50 when no
+     * criteria are specified (i.e. {@code vetRequest} is {@code null}).
+     *
+     * @param vetRequest optional vet criteria for the similarity search; may be {@code null}
+     * @return a list of formatted vet document strings matching the query
+     * @throws JacksonException if the vet request cannot be serialized to JSON
+     */
     public List<String> getVets(Vet vetRequest) throws JacksonException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String vetAsJson = objectMapper.writeValueAsString(vetRequest);
@@ -67,6 +89,13 @@ public class AIDataProvider {
 		return topMatches.stream().map(Document::getFormattedContent).toList();
 	}
 
+	/**
+	 * Adds a new pet to the specified owner via the Customers microservice.
+	 *
+	 * @param ownerId    the ID of the owner to add the pet to
+	 * @param petRequest the pet data to create
+	 * @return the created {@link PetDetails} as returned by the Customers service
+	 */
 	public PetDetails addPetToOwner(int ownerId, PetRequest petRequest) {
         return restClient
             .post()
@@ -76,6 +105,12 @@ public class AIDataProvider {
             .body(PetDetails.class);
 	}
 
+	/**
+	 * Creates a new pet owner via the Customers microservice.
+	 *
+	 * @param ownerRequest the owner data to create
+	 * @return the created {@link OwnerDetails} as returned by the Customers service
+	 */
 	public OwnerDetails addOwnerToPetclinic(OwnerRequest ownerRequest) {
        return restClient
             .post()
@@ -85,6 +120,11 @@ public class AIDataProvider {
             .body(OwnerDetails.class);
 	}
 
+    /**
+     * Resolves the base URI of the Customers microservice using Eureka service discovery.
+     *
+     * @return the URI of the first available customers-service instance
+     */
     @NotNull
     private URI getCustomerServiceUri() {
         return discoveryClient.getInstances("customers-service").get(0).getUri();

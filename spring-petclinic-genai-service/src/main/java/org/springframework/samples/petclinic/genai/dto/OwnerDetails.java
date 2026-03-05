@@ -18,8 +18,18 @@ package org.springframework.samples.petclinic.genai.dto;
 import java.util.List;
 
 /**
- * Simple Data Transfer Object representing an owner.
+ * Data Transfer Object representing a pet owner as returned by the Customers microservice.
+ * <p>
+ * Used by the GenAI service to deserialize owner data retrieved via REST calls for
+ * AI-powered queries and tool invocations.
  *
+ * @param id        the unique identifier of the owner
+ * @param firstName the owner's first name
+ * @param lastName  the owner's last name
+ * @param address   the owner's street address
+ * @param city      the owner's city
+ * @param telephone the owner's telephone number
+ * @param pets      the list of pets belonging to this owner
  * @author Oded Shopen
  */
 public record OwnerDetails(

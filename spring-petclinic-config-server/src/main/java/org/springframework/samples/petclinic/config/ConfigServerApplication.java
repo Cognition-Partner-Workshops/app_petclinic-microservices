@@ -20,12 +20,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.server.EnableConfigServer;
 
 /**
+ * Entry point for the Spring Cloud Config Server application.
+ * <p>
+ * Provides externalized configuration management for all microservices in the
+ * PetClinic ecosystem. Each service retrieves its configuration properties from
+ * this centralized server on startup, enabling consistent configuration across
+ * environments without redeploying individual services.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.config.server.EnableConfigServer
  */
 @EnableConfigServer
 @SpringBootApplication
 public class ConfigServerApplication {
 
+	/**
+	 * Launches the Config Server application.
+	 *
+	 * @param args command-line arguments passed to the application
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(ConfigServerApplication.class, args);
 	}

@@ -22,7 +22,11 @@ import jakarta.validation.constraints.Size;
 import java.util.Date;
 
 /**
- * Simple JavaBean domain object representing a visit.
+ * JPA entity representing a veterinary visit for a specific pet.
+ * <p>
+ * Mapped to the {@code visits} table. Each visit records the date, a textual
+ * description, and the pet ID it belongs to. Includes a {@link VisitBuilder}
+ * for convenient programmatic construction (primarily used in tests).
  *
  * @author Ken Krebs
  * @author Maciej Szarlinski
@@ -32,19 +36,23 @@ import java.util.Date;
 @Table(name = "visits")
 public class Visit {
 
+    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /** The date of the visit; defaults to the current date/time. Serialized as {@code yyyy-MM-dd}. */
     @Column(name = "visit_date")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date = new Date();
 
+    /** Free-text description of the visit (up to 8192 characters). */
     @Size(max = 8192)
     @Column(name = "description")
     private String description;
 
+    /** Foreign key reference to the pet this visit belongs to. */
     @Column(name = "pet_id")
     private int petId;
 
@@ -81,6 +89,11 @@ public class Visit {
     }
 
 
+    /**
+     * Builder for constructing {@link Visit} instances with a fluent API.
+     * <p>
+     * Primarily used in test code to create visit fixtures.
+     */
     public static final class VisitBuilder {
         private Integer id;
         private Date date;
@@ -90,6 +103,11 @@ public class Visit {
         private VisitBuilder() {
         }
 
+        /**
+         * Creates a new builder instance.
+         *
+         * @return a fresh {@link VisitBuilder}
+         */
         public static VisitBuilder aVisit() {
             return new VisitBuilder();
         }
@@ -114,6 +132,11 @@ public class Visit {
             return this;
         }
 
+        /**
+         * Builds and returns the configured {@link Visit} entity.
+         *
+         * @return the constructed visit
+         */
         public Visit build() {
             Visit visit = new Visit();
             visit.setId(id);

@@ -20,11 +20,22 @@ import java.util.List;
 
 
 /**
+ * Wrapper Data Transfer Object holding a collection of {@link VisitDetails}.
+ * <p>
+ * Used to deserialize the response from the Visits microservice. Provides
+ * a no-arg constructor that initializes an empty mutable list, which is
+ * required for JSON deserialization and circuit breaker fallback scenarios.
+ *
+ * @param items the list of visit detail records
  * @author Maciej Szarlinski
  */
 public record Visits (
     List<VisitDetails> items
 ) {
+    /**
+     * No-arg constructor that creates an empty {@link Visits} instance.
+     * Required for default deserialization and used as a fallback value.
+     */
     public Visits() {
         this(new ArrayList<>());
     }

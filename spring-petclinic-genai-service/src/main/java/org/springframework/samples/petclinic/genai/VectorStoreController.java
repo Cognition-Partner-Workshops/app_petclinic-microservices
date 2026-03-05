@@ -41,11 +41,31 @@ public class VectorStoreController {
 	private final VectorStore vectorStore;
     private final WebClient webClient;
 
+    /**
+     * Constructs the controller with vector store and reactive web client dependencies.
+     *
+     * @param vectorStore      the vector store for persisting vet document embeddings
+     * @param webClientBuilder the load-balanced WebClient builder for calling the vets service
+     */
     public VectorStoreController(VectorStore vectorStore, WebClient.Builder webClientBuilder) {
 		this.webClient = webClientBuilder.build();
 		this.vectorStore = vectorStore;
 	}
 
+	/**
+	 * Loads veterinarian data into the vector store when the application starts.
+	 * <p>
+	 * First checks for a pre-built {@code vectorstore.json} on the classpath to avoid
+	 * repeated embedding API calls. If the file does not exist, fetches all vet entities
+	 * from the vets-service, generates embeddings, stores them in the vector store, and
+	 * saves a snapshot to a temporary file for future reuse.
+	 * <p>
+	 * <strong>Warning:</strong> Loading from the live service on every startup can be
+	 * costly in terms of AI provider credits.
+	 *
+	 * @param event the Spring application started event that triggers this listener
+	 * @throws IOException if the vector store file cannot be read or written
+	 */
 	@EventListener
 	public void loadVetDataToVectorStoreOnStartup(ApplicationStartedEvent event) throws IOException {
 		Resource resource = new ClassPathResource("vectorstore.json");
@@ -91,6 +111,14 @@ public class VectorStoreController {
 		logger.info("vector store loaded with {} documents", documents.size());
 	}
 
+	/**
+	 * Converts a list of {@link Vet} objects to a JSON {@link Resource} suitable
+	 * for ingestion by the vector store's document reader.
+	 *
+	 * @param vets the list of vet entities to serialize
+	 * @return a {@link ByteArrayResource} containing the JSON representation,
+	 *         or {@code null} if serialization fails
+	 */
 	public Resource convertListToJsonResource(List<Vet> vets) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {

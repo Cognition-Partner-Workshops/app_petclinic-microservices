@@ -18,14 +18,23 @@ package org.springframework.samples.petclinic.vets.system;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Typesafe custom configuration.
+ * Type-safe configuration properties for the Vets microservice, bound from
+ * the {@code vets.*} namespace in application configuration.
  *
+ * @param cache nested cache configuration settings
  * @author Maciej Szarlinski
  */
 @ConfigurationProperties(prefix = "vets")
 public record VetsProperties(
     Cache cache
 ) {
+    /**
+     * Cache configuration controlling the time-to-live and maximum heap-based
+     * entry count for the vets cache.
+     *
+     * @param ttl      the cache entry time-to-live in seconds
+     * @param heapSize the maximum number of entries to keep on the JVM heap
+     */
     public record Cache(
         int ttl,
         int heapSize

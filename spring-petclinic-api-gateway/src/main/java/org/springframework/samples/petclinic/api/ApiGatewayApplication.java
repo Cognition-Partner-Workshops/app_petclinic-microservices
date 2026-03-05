@@ -40,22 +40,49 @@ import java.time.Duration;
 
 
 /**
+ * Entry point for the API Gateway microservice.
+ * <p>
+ * Acts as the single entry point for all client requests to the PetClinic system.
+ * Routes incoming requests to the appropriate downstream microservices (customers,
+ * visits, vets) and serves the Angular front-end as static content. Integrates with
+ * Eureka for service discovery, provides load-balanced {@link WebClient} and
+ * {@link RestTemplate} instances, and configures a Resilience4j circuit breaker
+ * with a 10-second timeout to protect against downstream service failures.
+ *
  * @author Maciej Szarlinski
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
  */
 @EnableDiscoveryClient
 @SpringBootApplication
 public class ApiGatewayApplication {
 
+    /**
+     * Launches the API Gateway application.
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(String[] args) {
         SpringApplication.run(ApiGatewayApplication.class, args);
     }
 
+    /**
+     * Creates a load-balanced {@link RestTemplate} that resolves service names
+     * (e.g. {@code http://customers-service}) to actual host addresses via Eureka.
+     *
+     * @return a {@link RestTemplate} with client-side load balancing enabled
+     */
     @Bean
     @LoadBalanced
     RestTemplate loadBalancedRestTemplate() {
         return new RestTemplate();
     }
 
+    /**
+     * Creates a load-balanced {@link WebClient.Builder} for reactive, non-blocking
+     * HTTP calls to downstream services discovered through Eureka.
+     *
+     * @return a {@link WebClient.Builder} with client-side load balancing enabled
+     */
     @Bean
     @LoadBalanced
     public WebClient.Builder loadBalancedWebClientBuilder() {
@@ -66,7 +93,13 @@ public class ApiGatewayApplication {
     private Resource indexHtml;
 
     /**
-     * workaround solution for forwarding to index.html
+     * Configures router functions to serve the Angular front-end static resources
+     * and forward root requests ({@code /}) to {@code index.html}.
+     * <p>
+     * This is a workaround for Spring Boot not automatically forwarding to
+     * {@code index.html} in reactive applications.
+     *
+     * @return a {@link RouterFunction} that serves static content and the SPA entry point
      * @see <a href="https://github.com/spring-projects/spring-boot/issues/9785">#9785</a>
      */
     @Bean
@@ -78,7 +111,12 @@ public class ApiGatewayApplication {
     }
 
     /**
-     * Default Resilience4j circuit breaker configuration
+     * Provides the default Resilience4j circuit breaker configuration for all reactive
+     * circuit breakers in the gateway. Uses default circuit breaker settings and a
+     * custom time limiter with a 10-second timeout to prevent long-running downstream
+     * calls from blocking the gateway.
+     *
+     * @return a {@link Customizer} that applies default circuit breaker and time limiter settings
      */
     @Bean
     public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {

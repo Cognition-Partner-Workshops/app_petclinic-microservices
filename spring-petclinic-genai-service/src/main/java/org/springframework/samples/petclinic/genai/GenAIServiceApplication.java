@@ -20,12 +20,26 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
+ * Entry point for the GenAI microservice.
+ * <p>
+ * Provides AI-powered chat functionality for the PetClinic system using Spring AI.
+ * Integrates with an LLM provider to answer questions about owners, pets, vets,
+ * and visits, and supports tool-calling to perform actions (e.g. adding pets or owners).
+ * Uses Retrieval-Augmented Generation (RAG) with a vector store of veterinarian data
+ * to improve answer quality. Registers with Eureka for service discovery.
+ *
  * @author Oded Shopen
+ * @see org.springframework.cloud.client.discovery.EnableDiscoveryClient
  */
 @EnableDiscoveryClient
 @SpringBootApplication
 public class GenAIServiceApplication {
 
+	/**
+	 * Launches the GenAI Service application.
+	 *
+	 * @param args command-line arguments passed to the application
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(GenAIServiceApplication.class, args);
 	}

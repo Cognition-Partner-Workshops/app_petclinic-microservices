@@ -25,6 +25,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * REST controller exposing a read-only endpoint for retrieving veterinarian data.
+ * <p>
+ * Serves the list of all veterinarians and their specialties at {@code GET /vets}.
+ * Results are cached under the {@code "vets"} cache region to reduce database load
+ * (caching is only active in the {@code production} profile).
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Ken Krebs
@@ -37,10 +43,21 @@ class VetResource {
 
     private final VetRepository vetRepository;
 
+    /**
+     * Constructs the resource with the required repository.
+     *
+     * @param vetRepository the JPA repository for {@link Vet} persistence
+     */
     VetResource(VetRepository vetRepository) {
         this.vetRepository = vetRepository;
     }
 
+    /**
+     * Returns all veterinarians with their specialties.
+     * Results are cached to avoid repeated database queries.
+     *
+     * @return a list of all {@link Vet} entities
+     */
     @GetMapping
     @Cacheable("vets")
     public List<Vet> showResourcesVetList() {

@@ -20,6 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Data Transfer Object representing the details of a pet, including its type
+ * and associated visit history.
+ *
+ * @param id        the unique identifier of the pet
+ * @param name      the pet's name
+ * @param birthDate the pet's birth date as a string (ISO format)
+ * @param type      the {@link PetType} classification (e.g. cat, dog)
+ * @param visits    mutable list of {@link VisitDetails} associated with this pet;
+ *                  initialized to an empty list if {@code null}
  * @author Maciej Szarlinski
  */
 public record PetDetails(
@@ -29,12 +38,19 @@ public record PetDetails(
     PetType type,
     List<VisitDetails> visits) {
 
+    /**
+     * Compact constructor that ensures the visits list is never {@code null}.
+     * Initializes an empty mutable list when no visits are provided.
+     */
     public PetDetails {
         if (visits == null) {
             visits = new ArrayList<>();
         }
     }
 
+    /**
+     * Builder for constructing {@link PetDetails} instances, primarily used in tests.
+     */
     public static final class PetDetailsBuilder {
         private int id;
         private String name;
@@ -45,6 +61,11 @@ public record PetDetails(
         private PetDetailsBuilder() {
         }
 
+        /**
+         * Creates a new builder instance.
+         *
+         * @return a new {@link PetDetailsBuilder}
+         */
         public static PetDetailsBuilder aPetDetails() {
             return new PetDetailsBuilder();
         }
@@ -74,6 +95,11 @@ public record PetDetails(
             return this;
         }
 
+        /**
+         * Builds a new {@link PetDetails} record from the accumulated builder state.
+         *
+         * @return a fully constructed {@link PetDetails} instance
+         */
         public PetDetails build() {
             return new PetDetails(id, name, birthDate, type, visits);
         }

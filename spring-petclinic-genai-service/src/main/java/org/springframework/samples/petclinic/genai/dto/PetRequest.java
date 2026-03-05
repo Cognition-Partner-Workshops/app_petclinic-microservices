@@ -20,8 +20,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
 
 /**
- * Simple Data Transfer Object representing a Pet request.
+ * Data Transfer Object for creating or updating a pet via the Customers microservice.
+ * <p>
+ * Used by the GenAI service's tool functions to send pet data to the Customers REST API.
  *
+ * @param id        the pet identifier (used during updates; ignored on creation)
+ * @param birthDate the pet's date of birth in {@code yyyy-MM-dd} format
+ * @param name      the pet's name
+ * @param typeId    the ID of the pet type (e.g. 1=cat, 2=dog)
  * @author Oded Shopen
  */
 public record PetRequest(int id,

@@ -18,8 +18,14 @@ package org.springframework.samples.petclinic.genai.dto;
 import java.util.List;
 
 /**
- * Simple Data Transfer Object representing a pet data type.
+ * Data Transfer Object representing a pet and its visit history, as returned by
+ * the Customers microservice.
  *
+ * @param id        the unique identifier of the pet
+ * @param name      the pet's name
+ * @param birthDate the pet's date of birth as a {@code yyyy-MM-dd} string
+ * @param type      the pet's species classification
+ * @param visits    the list of veterinary visits associated with this pet
  * @author Oded Shopen
  */
 public record PetDetails(

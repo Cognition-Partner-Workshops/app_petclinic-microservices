@@ -18,9 +18,13 @@ package org.springframework.samples.petclinic.customers.model;
 import jakarta.persistence.*;
 
 /**
+ * JPA entity representing a pet type classification (e.g. cat, dog, hamster).
+ * <p>
+ * Mapped to the {@code types} table. Referenced by {@link Pet} entities to
+ * categorize each pet by species.
+ *
  * @author Juergen Hoeller
  * @author Ramazan Sakin
- * Can be Cat, Dog, Hamster...
  */
 @Entity
 @Table(name = "types")

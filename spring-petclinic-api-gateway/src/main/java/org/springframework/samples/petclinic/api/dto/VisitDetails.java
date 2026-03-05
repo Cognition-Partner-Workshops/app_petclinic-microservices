@@ -16,6 +16,12 @@
 package org.springframework.samples.petclinic.api.dto;
 
 /**
+ * Data Transfer Object representing the details of a single veterinary visit.
+ *
+ * @param id          the unique identifier of the visit
+ * @param petId       the identifier of the pet this visit is associated with
+ * @param date        the date of the visit (ISO format string)
+ * @param description a textual description of the visit (e.g. diagnosis, treatment notes)
  * @author Maciej Szarlinski
  */
 public record VisitDetails (

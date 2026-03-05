@@ -25,20 +25,37 @@ import java.util.List;
 import static java.util.stream.Collectors.joining;
 
 /**
+ * Reactive client for communicating with the Visits microservice.
+ * <p>
+ * Uses a load-balanced {@link WebClient} to resolve the {@code visits-service}
+ * hostname through Eureka and retrieve visit records for one or more pets.
+ *
  * @author Maciej Szarlinski
  */
 @Component
 public class VisitsServiceClient {
 
-    // Could be changed for testing purpose
+    /** Base URL of the Visits service. Can be overridden for testing purposes. */
     private String hostname = "http://visits-service/";
 
+    /** Load-balanced WebClient builder injected by Spring, used to construct HTTP requests. */
     private final WebClient.Builder webClientBuilder;
 
+    /**
+     * Constructs the client with a load-balanced {@link WebClient.Builder}.
+     *
+     * @param webClientBuilder the load-balanced WebClient builder for service-to-service calls
+     */
     public VisitsServiceClient(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
+    /**
+     * Retrieves all visits associated with the given pet IDs from the Visits service.
+     *
+     * @param petIds the list of pet identifiers to look up visits for
+     * @return a {@link Mono} emitting a {@link Visits} object containing all matching visit records
+     */
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return webClientBuilder.build()
             .get()
@@ -47,10 +64,21 @@ public class VisitsServiceClient {
             .bodyToMono(Visits.class);
     }
 
+    /**
+     * Joins a list of pet IDs into a comma-separated string for use as a query parameter.
+     *
+     * @param petIds the list of pet identifiers to join
+     * @return a comma-separated string of pet IDs (e.g. {@code "1,2,3"})
+     */
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
 
+    /**
+     * Overrides the default Visits service hostname. Intended for use in integration tests.
+     *
+     * @param hostname the base URL to use for the Visits service
+     */
     void setHostname(String hostname) {
         this.hostname = hostname;
     }

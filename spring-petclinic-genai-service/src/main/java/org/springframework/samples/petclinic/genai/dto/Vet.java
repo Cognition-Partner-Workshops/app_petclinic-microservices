@@ -18,8 +18,15 @@ package org.springframework.samples.petclinic.genai.dto;
 import java.util.Set;
 
 /**
- * Simple Data Transfer Object representing a vet.
+ * Data Transfer Object representing a veterinarian and their specialties,
+ * as returned by the Vets microservice.
+ * <p>
+ * Used by the GenAI service for vector store embeddings and similarity searches.
  *
+ * @param id            the unique identifier of the vet
+ * @param firstName     the vet's first name
+ * @param lastName      the vet's last name
+ * @param specialties   the set of specialties this vet holds
  * @author Oded Shopen
  */
 public record Vet(

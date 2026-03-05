@@ -16,8 +16,15 @@
 package org.springframework.samples.petclinic.genai.dto;
 
 /**
- * Simple Data Transfer Object representing a customer visit.
+ * Data Transfer Object representing a veterinary visit record.
+ * <p>
+ * Used by the GenAI service to deserialize visit data from the Visits microservice
+ * when providing AI-assisted answers about pet visit history.
  *
+ * @param id          the unique identifier of the visit
+ * @param petId       the ID of the pet this visit belongs to
+ * @param date        the date of the visit as a string
+ * @param description a free-text description of the visit
  * @author Oded Shopen
  */
 public record VisitDetails(

@@ -16,6 +16,9 @@
 package org.springframework.samples.petclinic.api.dto;
 
 /**
+ * Data Transfer Object representing a pet's type classification (e.g. cat, dog, hamster).
+ *
+ * @param name the display name of the pet type
  * @author Maciej Szarlinski
  */
 public record PetType(String name) {

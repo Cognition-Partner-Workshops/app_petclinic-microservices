@@ -23,7 +23,12 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Simple business object representing a pet.
+ * JPA entity representing a pet in the PetClinic system.
+ * <p>
+ * Mapped to the {@code pets} table. Each pet has a name, birth date, a
+ * {@link PetType} classification, and belongs to an {@link Owner}.
+ * The owner reference is excluded from JSON serialization to avoid circular
+ * references when the owner's pet list is serialized.
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
@@ -34,21 +39,27 @@ import java.util.Objects;
 @Entity
 @Table(name = "pets")
 public class Pet {
+
+    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /** The pet's display name. */
     @Column(name = "name")
     private String name;
 
+    /** The pet's date of birth. */
     @Column(name = "birth_date")
     @Temporal(TemporalType.DATE)
     private Date birthDate;
 
+    /** The species/type classification for this pet. */
     @ManyToOne
     @JoinColumn(name = "type_id")
     private PetType type;
 
+    /** The owner this pet belongs to. Excluded from JSON to prevent circular serialization. */
     @ManyToOne
     @JoinColumn(name = "owner_id")
     @JsonIgnore
