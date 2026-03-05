@@ -78,16 +78,33 @@ You can then access petclinic here: http://localhost:8080/
 
 ## Microservices Overview
 
-This project consists of several microservices:
-- **Customers Service**: Manages customer data.
-- **Vets Service**: Handles information about veterinarians.
-- **Visits Service**: Manages pet visit records.
-- **GenAI Service**: Provides a chatbot interface to the application.
-- **API Gateway**: Routes client requests to the appropriate services.
-- **Config Server**: Centralized configuration management for all services.
-- **Discovery Server**: Eureka-based service registry.
+The application is decomposed into the following independently deployable services. Each service owns its data and communicates with the others over REST.
 
-Each service has its own specific role and communicates via REST APIs.
+### Infrastructure Services
+
+| Service | Default Port | Description |
+|---------|-------------|-------------|
+| **Config Server** (`spring-petclinic-config-server`) | `8888` | Centralized configuration management backed by a [Git repository][Configuration repository]. All application services pull their configuration from this server on startup via Spring Cloud Config. |
+| **Discovery Server** (`spring-petclinic-discovery-server`) | `8761` | Netflix Eureka service registry. Every microservice registers itself here, enabling client-side load balancing and dynamic service resolution without hard-coded URLs. |
+| **Admin Server** (`spring-petclinic-admin-server`) | `9090` | Spring Boot Admin dashboard for monitoring and managing all registered service instances — health checks, log levels, metrics visualization, and more. |
+| **API Gateway** (`spring-petclinic-api-gateway`) | `8080` | Single entry point for all client traffic. Routes requests to downstream services using Spring Cloud Gateway, serves the Angular front-end as static content, and uses Resilience4j circuit breakers (10 s timeout) with fallback responses to protect against downstream failures. Also acts as a Backend-for-Frontend (BFF) layer, aggregating data from the Customers and Visits services. |
+
+### Domain Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **Customers Service** (`spring-petclinic-customers-service`) | _random_ | Manages pet owner and pet data. Exposes CRUD REST endpoints for owners and pets, backed by Spring Data JPA (HSQLDB by default, MySQL optional). Instrumented with Micrometer `@Timed` metrics (`petclinic.owner`, `petclinic.pet`). |
+| **Vets Service** (`spring-petclinic-vets-service`) | _random_ | Manages veterinarian records and their specialties. Results are cached (in the `production` profile) to reduce database load. Externalized cache configuration is bound via `VetsProperties`. |
+| **Visits Service** (`spring-petclinic-visits-service`) | _random_ | Manages veterinary visit records linked to specific pets. Supports both single-pet and batch-pet visit retrieval (used by the API Gateway for aggregation). Instrumented with Micrometer `@Timed` metrics (`petclinic.visit`). |
+| **GenAI Service** (`spring-petclinic-genai-service`) | _random_ | AI-powered chatbot built with Spring AI. Integrates with OpenAI or Azure OpenAI to answer natural-language questions about owners, pets, vets, and visits. Uses Retrieval-Augmented Generation (RAG) with an in-memory vector store of vet data, and supports tool-calling to perform domain actions (e.g. adding pets or owners). |
+
+### Communication & Patterns
+
+- **Service Discovery**: All services register with the Eureka Discovery Server and resolve each other by logical service name (e.g. `customers-service`) rather than hard-coded host/port.
+- **Load Balancing**: The API Gateway and GenAI service use Spring Cloud LoadBalancer-backed `WebClient` and `RestTemplate` instances for client-side load balancing across service instances.
+- **Circuit Breaker**: The API Gateway wraps downstream calls with Resilience4j circuit breakers. When a downstream service is unavailable, fallback methods return graceful empty responses.
+- **Centralized Configuration**: All services fetch their `application.yml` from the Config Server at startup, allowing environment-specific overrides without redeployment.
+- **Observability**: Micrometer common tags (`application=petclinic`) are applied across all services for consistent metric filtering. Distributed tracing is supported via Micrometer Tracing and OpenTelemetry.
 
 
 ![Spring Petclinic Microservices screenshot](docs/application-screenshot.png)
