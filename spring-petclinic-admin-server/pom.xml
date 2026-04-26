@@ -17,6 +17,7 @@
 
     <properties>
         <spring-boot-admin.version>3.4.1</spring-boot-admin.version>
+        <jacoco.skip>true</jacoco.skip>
         <docker.image.exposed.port>9090</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
     </properties>
