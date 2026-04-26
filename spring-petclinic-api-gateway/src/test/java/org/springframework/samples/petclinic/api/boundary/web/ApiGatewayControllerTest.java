@@ -64,6 +64,44 @@ class ApiGatewayControllerTest {
             .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
 
+    @Test
+    void getOwnerDetails_filtersVisitsByPetId() {
+        PetDetails cat = PetDetails.PetDetailsBuilder.aPetDetails()
+            .id(20)
+            .name("Garfield")
+            .visits(new ArrayList<>())
+            .build();
+        PetDetails dog = PetDetails.PetDetailsBuilder.aPetDetails()
+            .id(30)
+            .name("Rex")
+            .visits(new ArrayList<>())
+            .build();
+        OwnerDetails owner = OwnerDetails.OwnerDetailsBuilder.anOwnerDetails()
+            .pets(List.of(cat, dog))
+            .build();
+        Mockito
+            .when(customersServiceClient.getOwner(2))
+            .thenReturn(Mono.just(owner));
+
+        VisitDetails catVisit = new VisitDetails(1, 20, null, "Cat checkup");
+        VisitDetails dogVisit = new VisitDetails(2, 30, null, "Dog vaccination");
+        VisitDetails unmatchedVisit = new VisitDetails(3, 99, null, "Unmatched");
+        Visits visits = new Visits(List.of(catVisit, dogVisit, unmatchedVisit));
+        Mockito
+            .when(visitsServiceClient.getVisitsForPets(List.of(20, 30)))
+            .thenReturn(Mono.just(visits));
+
+        client.get()
+            .uri("/api/gateway/owners/2")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.pets[0].visits[0].description").isEqualTo("Cat checkup")
+            .jsonPath("$.pets[1].visits[0].description").isEqualTo("Dog vaccination")
+            .jsonPath("$.pets[0].visits.length()").isEqualTo(1)
+            .jsonPath("$.pets[1].visits.length()").isEqualTo(1);
+    }
+
     /**
      * Test Resilience4j fallback method
      */
