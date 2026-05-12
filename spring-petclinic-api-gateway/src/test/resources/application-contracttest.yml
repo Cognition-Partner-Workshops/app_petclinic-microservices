@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      enabled: false
+  main:
+    web-application-type: none
+
+eureka:
+  client:
+    enabled: false
