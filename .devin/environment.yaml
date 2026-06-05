@@ -1,0 +1,58 @@
+# https://docs.devin.ai/onboard-devin/environment-yaml
+# Commands run from the repo root.
+
+# One-time setup: clone the external config repo needed by Config Server.
+initialize: |
+  git clone https://github.com/spring-petclinic/spring-petclinic-microservices-config.git /home/ubuntu/repos/spring-petclinic-microservices-config || true
+
+# Install project dependencies and compile all modules.
+maintenance: |
+  ./mvnw clean install -DskipTests
+
+knowledge:
+  - name: build
+    contents: |
+      ./mvnw clean install
+      # Compiles all 8 modules and runs tests. Java 17 required (pre-installed).
+      # Maven wrapper (./mvnw) is used — no system Maven needed.
+
+  - name: test
+    contents: |
+      ./mvnw test
+      # Runs unit tests across all modules. All tests use in-memory HSQLDB.
+
+  - name: run-app
+    contents: |
+      # The app requires starting services in order. The Config Server needs
+      # the external config repo cloned locally and the 'native' profile.
+      #
+      # 1. Config Server (port 8888) — must start first:
+      #    cd spring-petclinic-config-server
+      #    GIT_REPO=/home/ubuntu/repos/spring-petclinic-microservices-config ../mvnw spring-boot:run -Dspring-boot.run.profiles=native
+      #
+      # 2. Discovery Server (port 8761) — must start before other services:
+      #    cd spring-petclinic-discovery-server && ../mvnw spring-boot:run
+      #
+      # 3. Business services (random ports, registered in Eureka):
+      #    cd spring-petclinic-customers-service && ../mvnw spring-boot:run
+      #    cd spring-petclinic-vets-service && ../mvnw spring-boot:run
+      #    cd spring-petclinic-visits-service && ../mvnw spring-boot:run
+      #
+      # 4. API Gateway (port 8080) — AngularJS frontend:
+      #    cd spring-petclinic-api-gateway && ../mvnw spring-boot:run
+      #
+      # GenAI service requires OPENAI_API_KEY env var and is optional.
+      # App accessible at http://localhost:8080 once all services are up.
+
+  - name: lint
+    contents: |
+      # No dedicated lint command. The Maven build includes compilation checks.
+      ./mvnw compile
+
+  - name: project-structure
+    contents: |
+      Spring Boot 4.0.1 multi-module Maven project with Spring Cloud 2025.1.0.
+      8 modules: config-server, discovery-server, api-gateway, customers-service,
+      vets-service, visits-service, genai-service, admin-server.
+      Uses in-memory HSQLDB by default. Config served from external git repo
+      (spring-petclinic-microservices-config) via Spring Cloud Config Server.
