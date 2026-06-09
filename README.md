@@ -59,6 +59,33 @@ available by default at http://localhost:8761.
 
 The `main` branch uses an Eclipse Temurin with Java 17 as Docker base image.
 
+### Unified orchestration, health checks and reverse proxy
+
+The `docker-compose.yml` file orchestrates the whole stack on a dedicated
+`petclinic` bridge network. Every service declares:
+
+* a **Docker health check** (Spring services probe `/actuator/health`, Zipkin
+  `/health`, Grafana `/api/health`, Prometheus `/-/healthy`), so dependent
+  services only start once their dependencies report healthy;
+* a **`restart: unless-stopped`** policy for resilience;
+* an explicit attachment to the `petclinic` network so services resolve each
+  other by container name.
+
+An **NGINX reverse proxy** (the `reverse-proxy` service) is the single entry
+point for the stack on **http://localhost** (port 80):
+
+| Path | Routed to | Purpose |
+|------|-----------|---------|
+| `/` | `api-gateway:8080` | AngularJS frontend + all `/api/**` routes |
+| `/eureka/` | `discovery-server:8761` | Eureka service-registry dashboard |
+| `/admin/` | `admin-server:9090` | Spring Boot Admin dashboard |
+| `/zipkin/` | `tracing-server:9411` | Zipkin distributed-tracing UI |
+| `/healthz` | nginx | Reverse-proxy liveness probe |
+
+Each service's port is still published on the host for direct access/debugging
+(e.g. Grafana on http://localhost:3030, Prometheus on http://localhost:9091),
+but `http://localhost` is all that clients need.
+
 *NOTE: Under MacOSX or Windows, make sure that the Docker VM has enough memory to run the microservices. The default settings
 are usually not enough and make the `docker-compose up` painfully slow.*
 

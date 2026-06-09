@@ -1,31 +1,43 @@
+networks:
+  petclinic:
+    driver: bridge
+
 services:
   config-server:
     image: springcommunity/spring-petclinic-config-server
     container_name: config-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-I", "http://config-server:8888"]
-      interval: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 15
+      start_period: 30s
     ports:
      - 8888:8888
 
   discovery-server:
     image: springcommunity/spring-petclinic-discovery-server
     container_name: discovery-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://discovery-server:8761"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
     depends_on:
       config-server:
         condition: service_healthy
@@ -35,10 +47,19 @@ services:
   customers-service:
     image: springcommunity/spring-petclinic-customers-service
     container_name: customers-service
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -50,10 +71,19 @@ services:
   visits-service:
     image: springcommunity/spring-petclinic-visits-service
     container_name: visits-service
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -65,10 +95,19 @@ services:
   vets-service:
     image: springcommunity/spring-petclinic-vets-service
     container_name: vets-service
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -77,18 +116,26 @@ services:
     ports:
      - 8083:8083
 
-
   genai-service:
     image: springcommunity/spring-petclinic-genai-service
     container_name: genai-service
+    restart: unless-stopped
+    networks:
+      - petclinic
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
-      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-demo}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -97,14 +144,22 @@ services:
     ports:
      - 8084:8084
 
-
   api-gateway:
     image: springcommunity/spring-petclinic-api-gateway
     container_name: api-gateway
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -116,20 +171,38 @@ services:
   tracing-server:
     image: openzipkin/zipkin
     container_name: tracing-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
     ports:
      - 9411:9411
 
   admin-server:
     image: springcommunity/spring-petclinic-admin-server
     container_name: admin-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     depends_on:
       config-server:
         condition: service_healthy
@@ -143,19 +216,67 @@ services:
   grafana-server:
     build: ./docker/grafana
     container_name: grafana-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     ports:
     - 3030:3000
 
   prometheus-server:
     build: ./docker/prometheus
     container_name: prometheus-server
+    restart: unless-stopped
+    networks:
+      - petclinic
     deploy:
       resources:
         limits:
           memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     ports:
     - 9091:9090
+
+  ## NGINX reverse proxy -- single entry point for the stack
+
+  reverse-proxy:
+    build: ./docker/nginx
+    container_name: reverse-proxy
+    restart: unless-stopped
+    networks:
+      - petclinic
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      admin-server:
+        condition: service_healthy
+      tracing-server:
+        condition: service_healthy
+    ports:
+     - 80:80
