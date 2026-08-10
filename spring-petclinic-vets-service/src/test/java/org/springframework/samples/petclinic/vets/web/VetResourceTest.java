@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.vets.model.Specialty;
 import org.springframework.samples.petclinic.vets.model.Vet;
 import org.springframework.samples.petclinic.vets.model.VetRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,8 +29,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -56,5 +58,39 @@ class VetResourceTest {
         mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void shouldGetAVetWithItsSpecialties() throws Exception {
+        Vet vet = new Vet();
+        vet.setId(2);
+        vet.setFirstName("Helen");
+        vet.setLastName("Leary");
+        Specialty radiology = new Specialty();
+        radiology.setName("radiology");
+        vet.addSpecialty(radiology);
+
+        given(vetRepository.findAll()).willReturn(List.of(vet));
+
+        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$[0].lastName").value("Leary"))
+            .andExpect(jsonPath("$[0].specialties[0].name").value("radiology"));
+    }
+
+    @Test
+    void shouldReturnEmptyArrayWhenNoVetsExist() throws Exception {
+        given(vetRepository.findAll()).willReturn(List.of());
+
+        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void shouldReturnNotFoundForUnmappedPath() throws Exception {
+        mvc.perform(get("/vets/1").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 }
