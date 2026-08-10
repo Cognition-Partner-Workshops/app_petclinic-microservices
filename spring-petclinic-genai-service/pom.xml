@@ -18,6 +18,7 @@
         <docker.image.exposed.port>8081</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
         <spring-ai.version>2.0.0-M1</spring-ai.version>
+        <squareup-okhttp3.version>5.0.0-alpha.14</squareup-okhttp3.version>
     </properties>
 
 	<dependencies>
@@ -141,6 +142,18 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${squareup-okhttp3.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver3-junit5</artifactId>
+            <version>${squareup-okhttp3.version}</version>
             <scope>test</scope>
         </dependency>
 	</dependencies>

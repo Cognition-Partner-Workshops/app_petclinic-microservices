@@ -7,13 +7,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.samples.petclinic.api.dto.Visits;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VisitsServiceClientIntegrationTest {
 
@@ -44,6 +47,37 @@ class VisitsServiceClientIntegrationTest {
         assertVisitDescriptionEquals(visits.block(), PET_ID,"test visit");
     }
 
+
+    @Test
+    void getVisitsForPets_withSeveralPetIdsJoinedInQuery() throws InterruptedException {
+        prepareResponse();
+
+        visitsServiceClient.getVisitsForPets(List.of(1, 2, 3)).block();
+
+        assertEquals("1,2,3", server.takeRequest().getRequestUrl().queryParameter("petId"));
+    }
+
+    @Test
+    void getVisitsForPets_withEmptyResponse() {
+        server.enqueue(new MockResponse.Builder()
+            .addHeader("Content-Type", "application/json")
+            .body("{\"items\":[]}")
+            .build());
+
+        Visits visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1)).block();
+
+        assertNotNull(visits);
+        assertEquals(0, visits.items().size());
+    }
+
+    @Test
+    void getVisitsForPets_withUnavailableVisitsService() {
+        server.enqueue(new MockResponse.Builder().code(500).build());
+
+        Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
+
+        assertThrows(WebClientResponseException.InternalServerError.class, visits::block);
+    }
 
     private void assertVisitDescriptionEquals(Visits visits, int petId, String description) {
         assertEquals(1, visits.items().size());

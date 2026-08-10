@@ -12,8 +12,10 @@ import org.springframework.samples.petclinic.api.dto.OwnerDetails;
 import org.springframework.samples.petclinic.api.dto.PetDetails;
 import org.springframework.samples.petclinic.api.dto.VisitDetails;
 import org.springframework.samples.petclinic.api.dto.Visits;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.net.ConnectException;
@@ -91,6 +93,88 @@ class ApiGatewayControllerTest {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("$.pets[0].name").isEqualTo("Garfield")
+            .jsonPath("$.pets[0].visits").isEmpty();
+    }
+
+    @Test
+    void getOwnerDetails_withUnknownOwner() {
+        Mockito
+            .when(customersServiceClient.getOwner(999))
+            .thenReturn(Mono.error(WebClientResponseException.create(
+                404, "Not Found", HttpHeaders.EMPTY, new byte[0], null)));
+
+        client.get()
+            .uri("/api/gateway/owners/999")
+            .exchange()
+            .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getOwnerDetails_withFailingCustomersService() {
+        Mockito
+            .when(customersServiceClient.getOwner(1))
+            .thenReturn(Mono.error(WebClientResponseException.create(
+                500, "Internal Server Error", HttpHeaders.EMPTY, new byte[0], null)));
+
+        client.get()
+            .uri("/api/gateway/owners/1")
+            .exchange()
+            .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    void getOwnerDetails_withNonNumericOwnerId() {
+        client.get()
+            .uri("/api/gateway/owners/not-a-number")
+            .exchange()
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void getOwnerDetails_withoutPets() {
+        OwnerDetails owner = OwnerDetails.OwnerDetailsBuilder.anOwnerDetails()
+            .id(1)
+            .lastName("Franklin")
+            .pets(List.of())
+            .build();
+        Mockito
+            .when(customersServiceClient.getOwner(1))
+            .thenReturn(Mono.just(owner));
+        Mockito
+            .when(visitsServiceClient.getVisitsForPets(List.of()))
+            .thenReturn(Mono.just(new Visits(List.of())));
+
+        client.get()
+            .uri("/api/gateway/owners/1")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.lastName").isEqualTo("Franklin")
+            .jsonPath("$.pets").isEmpty();
+    }
+
+    @Test
+    void getOwnerDetails_ignoresVisitsOfOtherPets() {
+        PetDetails cat = PetDetails.PetDetailsBuilder.aPetDetails()
+            .id(20)
+            .name("Garfield")
+            .visits(new ArrayList<>())
+            .build();
+        OwnerDetails owner = OwnerDetails.OwnerDetailsBuilder.anOwnerDetails()
+            .pets(List.of(cat))
+            .build();
+        Mockito
+            .when(customersServiceClient.getOwner(1))
+            .thenReturn(Mono.just(owner));
+        Mockito
+            .when(visitsServiceClient.getVisitsForPets(Collections.singletonList(cat.id())))
+            .thenReturn(Mono.just(new Visits(List.of(new VisitDetails(300, 999, null, "Other pet")))));
+
+        client.get()
+            .uri("/api/gateway/owners/1")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
             .jsonPath("$.pets[0].visits").isEmpty();
     }
 
