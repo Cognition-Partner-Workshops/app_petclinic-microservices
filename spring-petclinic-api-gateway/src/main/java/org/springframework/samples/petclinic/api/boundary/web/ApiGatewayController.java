@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.api.boundary.web;
 
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.samples.petclinic.api.application.CustomersServiceClient;
 import org.springframework.samples.petclinic.api.application.VisitsServiceClient;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -61,8 +64,9 @@ public class ApiGatewayController {
                         return cb.run(it, throwable -> emptyVisitsForPets());
                     })
                     .map(addVisitsToOwner(owner))
-            );
-
+            )
+            .onErrorMap(WebClientResponseException.NotFound.class, notFound ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner " + ownerId + " not found", notFound));
     }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {

@@ -96,9 +96,6 @@ class ApiGatewayControllerTest {
             .jsonPath("$.pets[0].visits").isEmpty();
     }
 
-    /**
-     * The gateway has no error mapping, so a not-found from the customers service surfaces as a server error.
-     */
     @Test
     void getOwnerDetails_withUnknownOwner() {
         Mockito
@@ -108,6 +105,19 @@ class ApiGatewayControllerTest {
 
         client.get()
             .uri("/api/gateway/owners/999")
+            .exchange()
+            .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getOwnerDetails_withFailingCustomersService() {
+        Mockito
+            .when(customersServiceClient.getOwner(1))
+            .thenReturn(Mono.error(WebClientResponseException.create(
+                500, "Internal Server Error", HttpHeaders.EMPTY, new byte[0], null)));
+
+        client.get()
+            .uri("/api/gateway/owners/1")
             .exchange()
             .expectStatus().is5xxServerError();
     }
