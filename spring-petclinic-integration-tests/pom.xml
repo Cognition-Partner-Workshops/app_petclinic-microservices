@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>spring-petclinic-integration-tests</artifactId>
+	<packaging>jar</packaging>
+	<description>Cross-service integration tests running against the Docker Compose environment</description>
+
+	<parent>
+		<groupId>org.springframework.samples</groupId>
+		<artifactId>spring-petclinic-microservices</artifactId>
+		<version>4.0.1</version>
+	</parent>
+
+	<properties>
+		<!-- Integration tests need a Docker environment, so they are opt-in -->
+		<skipITs>true</skipITs>
+		<rest-assured.version>5.5.1</rest-assured.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>${rest-assured.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>json-path</artifactId>
+			<version>${rest-assured.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<skipITs>${skipITs}</skipITs>
+					<systemPropertyVariables>
+						<petclinic.compose.file>${project.basedir}/docker-compose-integration-tests.yml</petclinic.compose.file>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- mvn verify -P integration-tests -pl spring-petclinic-integration-tests -->
+			<id>integration-tests</id>
+			<properties>
+				<skipITs>false</skipITs>
+			</properties>
+		</profile>
+	</profiles>
+</project>
