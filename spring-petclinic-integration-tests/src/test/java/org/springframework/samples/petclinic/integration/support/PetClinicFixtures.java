@@ -21,6 +21,8 @@ public final class PetClinicFixtures {
 
     public static Map<String, Object> petRequest(String name, String birthDate, int typeId) {
         Map<String, Object> pet = new LinkedHashMap<>();
+        // PetRequest.id is a primitive, the service rejects the payload without it
+        pet.put("id", 0);
         pet.put("name", name);
         pet.put("birthDate", birthDate);
         pet.put("typeId", typeId);

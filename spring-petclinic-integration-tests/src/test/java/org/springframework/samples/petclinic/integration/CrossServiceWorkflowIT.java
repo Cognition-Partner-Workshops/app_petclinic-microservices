@@ -184,11 +184,14 @@ class CrossServiceWorkflowIT extends AbstractPetClinicIT {
 
     @Test
     @Order(7)
-    void gatewayRejectsUnknownOwners() {
-        gateway()
+    void gatewayReturnsANullOwnerForAnUnknownId() {
+        // findOwner returns an Optional, so an unknown id is a 200 with a null body rather than a 404
+        String body = gateway()
             .get("/api/customer/owners/{ownerId}", 9999)
             .then()
             .statusCode(200)
-            .body(org.hamcrest.Matchers.emptyOrNullString());
+            .extract()
+            .asString();
+        assertThat(body).isEqualTo("null");
     }
 }

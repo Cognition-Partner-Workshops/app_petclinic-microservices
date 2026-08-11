@@ -17,6 +17,8 @@
 		<!-- Integration tests need a Docker environment, so they are opt-in -->
 		<skipITs>true</skipITs>
 		<rest-assured.version>5.5.1</rest-assured.version>
+		<!-- RestAssured is built against Groovy 4, the Groovy 5 managed by the Spring Boot BOM breaks its request DSL -->
+		<groovy.version>4.0.24</groovy.version>
 	</properties>
 
 	<dependencies>
@@ -30,6 +32,12 @@
 			<groupId>io.rest-assured</groupId>
 			<artifactId>json-path</artifactId>
 			<version>${rest-assured.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used by RestAssured to serialize the request bodies -->
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

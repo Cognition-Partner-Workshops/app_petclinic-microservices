@@ -24,8 +24,8 @@ import static org.springframework.samples.petclinic.integration.support.PetClini
 /**
  * Verifies how the API gateway degrades while the visits-service is down: the aggregation
  * endpoint keeps serving customer data through the {@code getOwnerDetails} circuit breaker
- * fallback, while the plain proxy route to the visits-service fails. Once the service is
- * back, visits are aggregated again.
+ * fallback, while the plain proxy route to the visits-service stops serving data. Once the
+ * service is back, visits are aggregated again.
  * <p>
  * The visits-service uses an in-memory database, so its data does not survive a restart
  * and the visit is recreated after the service comes back up.
@@ -99,14 +99,16 @@ class VisitsServiceOutageIT extends AbstractPetClinicIT {
 
     @Test
     @Order(3)
-    void visitsRouteFailsWhileVisitsServiceIsDownAndCustomersRouteKeepsWorking() {
+    void visitsRouteStopsServingDataWhileVisitsServiceIsDown() {
+        // The default CircuitBreaker filter forwards to /fallback, which is only mapped for
+        // POST, so the proxied GET ends up as 405 instead of a 5xx of its own
         await("the visits route to stop serving data")
             .atMost(Duration.ofMinutes(2))
             .pollInterval(2, TimeUnit.SECONDS)
             .ignoreExceptions()
             .untilAsserted(() -> assertThat(gateway()
                 .get("/api/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
-                .statusCode()).isGreaterThanOrEqualTo(500));
+                .statusCode()).isIn(405, 500, 503, 504));
 
         gateway().get("/api/customer/owners/{ownerId}", ownerId).then().statusCode(200);
     }

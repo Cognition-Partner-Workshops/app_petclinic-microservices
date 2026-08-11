@@ -63,9 +63,10 @@ public final class PetClinicEnvironment {
 
     public static synchronized PetClinicEnvironment getInstance() {
         if (instance == null) {
-            PetClinicEnvironment environment = new PetClinicEnvironment();
-            environment.start();
-            instance = environment;
+            // Assigned before starting so that a failed startup is reported once instead of
+            // being retried by every test class
+            instance = new PetClinicEnvironment();
+            instance.start();
         }
         return instance;
     }
@@ -105,8 +106,8 @@ public final class PetClinicEnvironment {
             return;
         }
         log.info("Starting the PetClinic environment from {} (project {})", composeFile, projectName);
-        compose("up", "--detach", "--wait", "--wait-timeout", String.valueOf(STARTUP_TIMEOUT.toSeconds()));
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+        compose("up", "--detach", "--wait", "--wait-timeout", String.valueOf(STARTUP_TIMEOUT.toSeconds()));
         awaitGatewayRoutes();
     }
 
