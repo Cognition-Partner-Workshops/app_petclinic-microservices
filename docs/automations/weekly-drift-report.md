@@ -15,7 +15,7 @@ automation does *here*.
 (schema: `timesheet-app/docs/automations/remediation-queue.schema.json`):
 
 ```bash
-python3 scripts/drift_scan.py --out /tmp/drift-petclinic.json   # uses ./mvnw dependency:list
+python3 scripts/drift_scan.py --out drift-petclinic.json   # uses ./mvnw dependency:list
 python3 scripts/drift_scan.py --skip-maven                      # parse the poms directly
 ```
 
