@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -42,6 +43,28 @@ HIGH_BLAST_RADIUS = {
     "org.springframework.ai:spring-ai-bom",
     "java",
 }
+
+
+def resolve_within(base, *parts):
+    """Path under base, or None when the joined path escapes it (--root is user input)."""
+    base = os.path.realpath(base)
+    candidate = os.path.realpath(os.path.join(base, *parts))
+    return candidate if candidate == base or candidate.startswith(base + os.sep) else None
+
+
+def output_bases():
+    """Directories --out may write into: the working tree and the temp directories."""
+    candidates = [os.getcwd(), tempfile.gettempdir(), "/tmp"]
+    return tuple(sorted({os.path.realpath(c) for c in candidates if os.path.isdir(c)}))
+
+
+def resolve_output(path):
+    """--out is user input, so it is validated against output_bases() before opening."""
+    candidate = os.path.realpath(path)
+    bases = output_bases()
+    if any(candidate.startswith(base + os.sep) for base in bases):
+        return candidate
+    raise SystemExit(f"--out must be inside one of {', '.join(bases)}: {path}")
 
 
 def http_json(url, payload=None, timeout=30):
@@ -185,8 +208,8 @@ def local_artifacts(root):
 
 def java_release(root, latest, errors):
     """The pom's java.version against the newest LTS feature release."""
-    pom = os.path.join(root, "pom.xml")
-    if not os.path.isfile(pom):
+    pom = resolve_within(root, "pom.xml")
+    if not pom or not os.path.isfile(pom):
         errors.append("no root pom.xml; skipped java.version check")
         return None
     with open(pom) as handle:
@@ -352,7 +375,7 @@ def main():
     }
     payload = json.dumps(document, indent=2)
     if args.out:
-        with open(args.out, "w") as handle:
+        with open(resolve_output(args.out), "w") as handle:
             handle.write(payload + "\n")
     else:
         print(payload)
